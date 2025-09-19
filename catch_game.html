@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+      content="default-src * 'self' data: blob: filesystem:;
+               script-src * 'unsafe-inline' 'unsafe-eval';
+               style-src * 'unsafe-inline';
+               img-src * data: blob:;">
+  <title>캐치마인드 게임</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+  font-family: 'MaplestoryOTFBold';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      font-family: 'Gowun Dodum', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #fff8dc;
+    }
+
+    #quiz-screen {
+      width: 90vw;
+      max-width: 750px;
+      aspect-ratio: 4 / 5;
+      background: url("/image/catch_quiz1.png") no-repeat center center;
+      background-size: cover;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding-top: 1rem;
+    }
+
+    canvas {
+  width: 90%;
+  max-width: 490px;
+  aspect-ratio: 4 / 3;
+  display: block;
+  border: 2px solid #333;
+  background-color: #fefefe;
+}
+
+
+    #guess-input {
+      width: 70%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: 1px solid #aaa;
+      border-radius: 10px;
+    }
+
+    #submit-btn {
+   padding: 0.6rem 1.5rem;
+  font-size: 1.4rem;
+  font-family: 'MaplestoryOTFBold';
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#submit-btn:hover {
+  background-color: #3498db;
+}
+
+#submit-btn:active {
+  transform: scale(0.95);
+}
+
+#start-modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 600px;
+  background-image: url('./image/together_modal.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 20px;
+  z-index: 999;
+  display: flex; 
+}
+#result-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.4);
+  display: none; 
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+
+#result-box {
+  width: 90vw;
+  max-width: 500px;
+  height: 700px;
+  background-image: url('./image/result_modal.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-content {
+  position: relative; 
+  text-align: center;
+  font-family: 'Gowun Dodum', sans-serif;
+  color: #00336600;
+  font-size: 1.3rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0);  
+  border-radius: 12px;
+}
+
+#modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0,0,0,0.4); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+#start-modal-wrapper {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+#countdown {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); 
+  font-size: 6rem;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  color: #ffffff;
+  z-index: 1000;
+  text-shadow: 2px 2px 4px #000;
+  display: none;
+}
+
+
+@keyframes countdown-bounce {
+  0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  50%  { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.countdown-bounce {
+  animation: countdown-bounce 0.8s ease;
+}
+#game-info {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 1.1rem;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  color: white;
+  background-color: rgba(0,0,0,0.4);
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+#overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  color: white;
+  text-shadow: 2px 2px 6px #000;
+  display: none;
+  pointer-events: none;
+  white-space: nowrap; 
+  text-align: center;
+  max-width: 90vw;      
+  overflow-wrap: break-word;
+  word-break: keep-all;
+}
+#quiz-screen h2,
+#question-text {
+  font-family: 'MaplestoryOTFBold', sans-serif !important;
+}
+</style>
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:;">
+</head>
+<body>
+  <div id="quiz-screen">
+    <div id="game-info">
+      <span id="time-display">⏱ 남은 시간: 60초</span>
+       </div>
+
+    <h2> <div style='margin-top: 1.9rem;'></h2>
+   <div id="question-text" style="font-family: 'MaplestoryOTFBold', sans-serif; font-size: 1.6rem; font-weight: bold; text-align: center; color: #003366; background-color: rgba(255,255,255,0.8); padding: 1rem 2rem; border-radius: 12px;">
+  문제 불러오는 중...
+</div>
+    <canvas id="draw-canvas"
+        style="width: 90%; max-width: 490px; aspect-ratio: 4 / 3; display: block; border: 2px solid #333; background-color: #fefefe;">
+</canvas>
+    <input type="text" id="guess-input" placeholder="정답을 입력합니다." />
+    <button id="submit-btn">제출</button>
+
+<button id="clear-btn" style="
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-family: 'MaplestoryOTFBold';
+  background-color: #ffdddd;
+  border: 2px solid #cc4444;
+  border-radius: 8px;
+  cursor: pointer;
+  display: none; /* 처음엔 안 보이게 설정 */
+  z-index: 10;
+">
+  전체 지우기
+</button>
+
+  </div>
+
+  <div id="start-modal-wrapper" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.3); z-index: 999;">
+    <div id="start-modal">
+      <div class="modal-content">
+        <p>출제자가 그림을 그리면<br>참가자는 정답을 입력합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="countdown"></div>
+
+<div id="result-modal" style="display: none;">
+ <div id="result-box" style="
+  width: 90vw;
+  max-width: 500px;
+  height: 700px;
+  background-image: url('/image/result_modal.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  padding: 8rem 1.5rem 2rem; /* ✅ margin-top 대신 padding-top 사용 */
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+">
+
+   <div id="final-result" style="
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  font-size: 2rem;
+  color: #333;
+  text-align: center;
+  padding: 1rem;
+  white-space: pre-line;
+">
+  결과 텍스트가 여기에 표시됩니다
+</div>
+    <div class="button-row" style="
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 7.5rem;
+">
+  <button onclick="goToEntry()" style="
+    padding: 10px 40px;
+    font-family: 'MaplestoryOTFBold', sans-serif;
+    font-size: 1.8rem;
+    background-color: #ffd966;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  "
+  onmouseover="this.style.backgroundColor='#ffe0668f'"
+  onmouseout="this.style.backgroundColor='#ffd966'"
+  onmousedown="this.style.transform='scale(0.95)'"
+  onmouseup="this.style.transform='scale(1)'">
+    다시하기
+  </button>
+
+  <button id="menu-btn" onclick="goToMain()" style="
+    padding: 10px 40px;
+    font-family: 'MaplestoryOTFBold', sans-serif;
+    font-size: 1.8rem;
+    background-color: #ffd966;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  "
+  onmouseover="this.style.backgroundColor='#ffe0668f'"
+  onmouseout="this.style.backgroundColor='#ffd966'"
+  onmousedown="this.style.transform='scale(0.95)'"
+  onmouseup="this.style.transform='scale(1)'">
+    메인메뉴
+  </button>
+</div>
+  </div>
+</div>
+<div id="overlay"
+  style="position: fixed; top: 50%; left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 3rem; font-family: 'MaplestoryOTFBold', sans-serif;
+         color: white; text-shadow: 2px 2px 6px #000;
+         z-index: 2000; display: none; pointer-events: none;">
+</div>
+
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script src="./catch_game.js"></script>
+</body>
+</html>

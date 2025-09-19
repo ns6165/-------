@@ -1,0 +1,389 @@
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 위인 얼굴 분석</title>
+
+  <script defer src="/face-api.min.js"></script>
+
+  <script type="module" src="/face.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+  
+  <style>
+    @font-face {
+      font-family: 'MaplestoryOTFBold';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Gowun Dodum', sans-serif;
+      flex-direction: column;
+    }
+
+    #quiz-screen {
+      width: 90vw;
+      max-width: 750px;
+      aspect-ratio: 4/5;
+      background: url("/image/face.png") no-repeat center center;
+      background-size: cover;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0.5rem;
+    }
+
+    #title {
+      font-size: 4rem;
+      font-family: 'MaplestoryOTFBold';
+      color: #003366;
+      margin-bottom: 1.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      animation: floatTitle 3s ease-in-out infinite;
+    }
+
+    @keyframes floatTitle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    #uploadGuide {
+      font-size: 2.4rem;
+      color: #555;
+      font-family: 'MaplestoryOTFBold';
+      margin-bottom: 0.8rem;
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    #imageInput {
+      font-size: 1.4rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #preview {
+      width: 70%;
+      max-width: 350px;
+      height: 340px;
+       object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      margin-bottom: 1rem;
+      border: 8px solid #ccc;
+      background: url('/image/placeholder.png') no-repeat center center;
+      background-size: cover;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 16px; 
+  margin-top: 0.5rem; 
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .button-group button {
+      width: auto;
+      padding: 20px 40px;
+      line-height: 1.2;
+    }
+
+    #analyzeBtn, #customUploadBtn {
+      font-size: 2.0rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      background-color: #90CAF9;
+      cursor: pointer;
+      font-family: 'MaplestoryOTFBold';
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #analyzeBtn:hover, #customUploadBtn:hover {
+      background-color: #64B5F6;
+      transform: scale(1.08);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    }
+
+    #analyzeBtn:active, #customUploadBtn:active {
+      transform: scale(0.95);
+    }
+
+    #resultModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    #resultBox {
+      width: 90vw;
+      max-width: 500px;
+      background-image: url('/image/result_modal_face.png');
+      background-size: cover;
+      background-position: center;
+      background-color: white;
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    #resultBox img {
+      width: 80%;
+      max-width: 300px;
+      margin-bottom: 1rem;
+    }
+
+    #resultBox p {
+      font-size: 1.4rem;
+      font-family: 'MaplestoryOTFBold';
+      margin-bottom: 1.5rem;
+    }
+
+   #closeBtn {
+  padding: 12px 36px;
+  font-size: 1.2rem;
+  background-color: #90CAF9; 
+  border: none;
+  border-radius: 10px;
+  font-family: 'MaplestoryOTFBold';
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+#closeBtn:hover {
+  background-color: #64B5F6; 
+  transform: scale(1.05);
+}
+
+
+    #resultImage.roll {
+      animation: shakeRoll 0.2s infinite;
+    }
+
+    @keyframes shakeRoll {
+      0% { transform: rotate(-1deg) scale(1.02); }
+      50% { transform: rotate(1deg) scale(1.05); }
+      100% { transform: rotate(-1deg) scale(1.02); }
+    }
+    #startConfirmBtn:hover {
+  background-color: #64B5F6;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+#startConfirmBtn:active {
+  transform: scale(0.95);
+  background-color: #42A5F5;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+}
+.modal-btn {
+  padding: 14px 28px;
+  font-size: 1.3rem;
+  font-family: 'MaplestoryOTFBold', cursive;
+  background-color: #90CAF9;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+.modal-btn:hover {
+  background-color: #64B5F6;
+  transform: scale(1.05);
+}
+.modal-btn:active {
+  transform: scale(0.95);
+  background-color: #42A5F5;
+}
+#back-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 1.6rem;
+  font-family: 'MaplestoryOTFBold';
+  z-index: 1000;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+#back-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+#back-button:active {
+  transform: scale(0.95);
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+  </style>
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:;">
+</head>
+<body>
+ 
+<div id="startModal" style="
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+">
+  <div style="
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+   width: 90%;
+      max-width: 500px;
+      height: 640px;
+    background-image: url('/image/start-modal.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    box-shadow: none;
+  ">
+
+    <p style="
+      text-align: center;
+      color: #003366;
+      font-size: 1.6rem;
+      font-weight: bold;
+      font-family: 'MaplestoryOTFBold', cursive;
+      margin-top: 7rem;
+      margin-bottom: 1.5rem;
+    ">
+    AI가 닮은 위인을 찾아줍니다.
+    </p>
+
+   <div id="achievement-summary" style=
+      "margin-top: 18rem;
+       margin-bottom: 1rem;
+       text-align: center;
+       font-size: 1.6rem; 
+       line-height: 1.2;
+      font-family: 'MaplestoryOTFBold'; 
+      color: #003366;">
+  도전과제 0 / 5개 완료
+</div>
+
+    <div style="
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      margin-top: 0.3rem;
+    ">
+      <button id="startConfirmBtn" class="modal-btn">시작하기</button>
+      <button id="goMenuBtn" class="modal-btn">메인메뉴</button>
+    </div>
+  </div>
+</div>
+  <div id="quiz-screen">
+     <button id="back-button" onclick="goBackToMenu()">뒤로가기</button>
+    <div id="title">나 닮은 위인찾기</div>
+    <p id="uploadGuide">사진을 선택하거나 촬영해 봅시다.</p>
+
+    <input type="file" id="imageInput" accept="image/*" capture="environment" style="display: none;" />
+
+    <img id="preview" src="/image/placeholder.png" alt="사진 미리보기" />
+
+    <p id="aiStatusText" style="color: red; font-size: 1.4rem; font-family: 'MaplestoryOTFBold'; margin-bottom: 0.5rem;">
+ AI를 준비하고 있습니다. 잠시만 기다려 주십시오.
+</p>
+    <div class="button-group">
+      <button id="customUploadBtn" disabled>사진 선택하기</button>
+      <button id="analyzeBtn"> AI 분석하기 </button>
+    </div>
+  </div>
+
+  <div id="resultModal">
+    <div id="resultBox">
+      <img id="resultImage" src="" alt="위인 이미지" />
+      <p id="description"></p>
+      <button id="closeBtn">닫기</button>
+    </div>
+  </div>
+<div id="achievement-popup" style="
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 4px solid #ffd966;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  padding: 1.5rem 2rem;
+  font-family: 'MaplestoryOTFBold';
+  font-size: 1.4rem;
+  color: #003366;
+  display: none;
+  z-index: 99999;
+  text-align: center;
+">
+  🎉 도전과제 달성!
+</div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const imageInput = document.getElementById('imageInput');
+      const preview = document.getElementById('preview');
+      const customUploadBtn = document.getElementById('customUploadBtn');
+
+      customUploadBtn.addEventListener('click', () => {
+        imageInput.click();
+      });
+
+      imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          preview.src = event.target.result;
+          preview.style.background = 'none';
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+    function goBackToMenu() {
+    
+  localStorage.removeItem('nextGame');
+  localStorage.removeItem('selectedCharacter');
+  localStorage.removeItem('selectedMode');
+  
+  setTimeout(() => {
+    window.location.href = "/menu.html"; 
+  }, 300); 
+}
+  </script>
+</body>
+</html>

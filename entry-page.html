@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+      content="default-src * 'self' data: blob: filesystem:;
+               script-src * 'unsafe-inline' 'unsafe-eval';
+               style-src * 'unsafe-inline';
+               img-src * data: blob:;">
+  <title>골든벨 입장</title>
+  <style>
+    @font-face {
+      font-family: 'MaplestoryOTFBold';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff') format('woff');
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'MaplestoryOTFBold', sans-serif;
+      background-color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #entry-screen {
+      width: 90vw;
+      max-width: 750px;
+      aspect-ratio: 4 / 5;
+      background-image: url("./image/game_background.png");  
+      background-size: cover;
+      background-position: center;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      gap: 1.5rem;
+    }
+
+    .entry-box {
+      background-color: rgba(255, 255, 255, 0.85);
+      padding: 2rem;
+      border-radius: 16px;
+      width: 80%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 1rem;
+      font-size: 2.4rem;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      font-family: 'MaplestoryOTFBold';
+    }
+
+    #ready-btn {
+  padding: 1rem 2.5rem;
+  font-size: 2.4rem;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  background-color: #ffbb00;
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#ready-btn:hover {
+  background-color: #ffd700;
+  transform: scale(1.04);
+}
+
+#ready-btn:active {
+  transform: scale(0.96);
+}
+
+    @media screen and (max-height: 700px) {
+      #entry-screen {
+        max-height: 90vh;
+      }
+    }
+    #entry-title {
+  font-size: 3.2rem;
+  font-weight: bold;
+  color: #000000;
+  background-color: rgba(255, 255, 200, 0.85);
+  padding: 0.8rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+}
+#scoreboard {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  display: none;
+
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+.score-entry {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  width: 100%; 
+}
+
+#entry-screen {
+  position: relative; 
+}
+#mainmenu-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 2.0rem;
+  z-index: 10;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'MaplestoryOTFBold';
+}
+
+#mainmenu-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  transform: scale(1.05); 
+}
+
+#mainmenu-button:active {
+  transform: scale(0.95); 
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+  </style>
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:;">
+</head>
+<body>
+   <div id="entry-screen">
+     <button id="mainmenu-button" onclick="goToMainMenu()">메인메뉴</button>
+
+    <div id="entry-title">
+  퀴즈 배틀 입장 화면
+</div>
+<div id="server-status" style="margin-top: 1rem; font-size: 1.8rem; color: gray;">
+  서버 상태 확인 중...
+</div>
+    <div class="entry-box">
+      <input type="text" id="nickname" placeholder="닉네임을 입력하십시오" />
+      <input type="text" id="code" placeholder="게임 코드를 입력하십시오" />
+      <button id="ready-btn">✅ 준비 완료</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+   const socket = io("https://goldenbell-server.onrender.com");
+    const clickSound = new Audio("./sound/click.wav");
+
+document.getElementById("ready-btn").addEventListener("click", () => {
+  const clickSound = new Audio("./sound/click.wav");
+  clickSound.play().catch(() => {});
+  const nickname = document.getElementById("nickname").value.trim();
+  const code = document.getElementById("code").value.trim();
+
+  if (!nickname || !code) {
+    alert("닉네임과 게임 코드를 모두 입력하지 않았습니다!");
+    return;
+  }
+
+  socket.emit("verifyCode", code);
+
+  socket.once("codeVerified", (isValid) => {
+    if (!isValid) {
+      alert("❌ 유효하지 않은 게임 코드입니다.");
+      return;
+    }
+
+    localStorage.setItem("nickname", nickname);
+    localStorage.setItem("code", code);
+    window.location.href = "./goldenbell.html";
+  });
+});
+function goToMainMenu() {
+   const clickSound = new Audio("./sound/click.wav");
+  clickSound.play().catch(() => {});
+  
+  setTimeout(() => {
+    localStorage.removeItem('nextGame');
+    localStorage.removeItem('selectedCharacter');
+    localStorage.removeItem('selectedMode');
+    window.location.href = "./menu.html";
+  }, 300);  
+}
+
+  </script>
+<script>
+const statusEl = document.getElementById("server-status");
+
+fetch("https://card-match-game-server.onrender.com")
+  .then(() => {
+    statusEl.textContent = "🟢 서버가 준비되었습니다!";
+    statusEl.style.color = "green";
+  })
+  .catch(() => {
+    statusEl.textContent = "🔴 서버가 응답하지 않습니다!";
+    statusEl.style.color = "red";
+  });
+</script>
+
+</body>
+</html>

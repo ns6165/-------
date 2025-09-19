@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한국사 미니게임 천국 - 메뉴</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #f0f0f0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Arial Rounded MT Bold', 'Pretendard', sans-serif;
+      flex-direction: column;
+    }
+    .game-container {
+      width: 90%;
+      max-width: 700px;
+      aspect-ratio: 4/5;
+      background: url("/image/background1.png") no-repeat center center;
+      background-size: cover;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      position: relative;
+    }
+    .cloud {
+      position: absolute;
+      width: 24vw;
+      max-width: 200px;
+      height: auto;
+      animation-duration: 17s;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+    }
+    .cloud-left {
+      top: -5%;
+      left: -100px;
+      animation-name: flyLeftCloud;
+    }
+    .cloud-right {
+      top: 5%;
+      right: -100px;
+      animation-name: flyRightCloud;
+    }
+    @keyframes flyLeftCloud {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(200px); }
+      100% { transform: translateX(400px); }
+    }
+    @keyframes flyRightCloud {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(-200px); }
+      100% { transform: translateX(-400px); }
+    }
+    .title {
+      position: absolute;
+      top: 5%;
+      left: 50%;
+      transform: translate(-50%, 0);
+      width: 60%;
+      max-width: 640px;
+      animation: bounce 3s ease-in-out infinite;
+      z-index: 2;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, -10px); }
+    }
+    .transparent-button {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 15%;
+      aspect-ratio: 1/1;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .gif-button {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 18%; 
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .gif-button:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  .grade-label {
+  position: absolute;
+  bottom: 8px;
+  width: 100%;
+  text-align: center;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  font-size: 1.2rem;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px #000000;
+  z-index: 5;
+}
+  </style>
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:;">
+</head>
+<body>
+<div class="game-container">
+  <img src="/image/left-cloud.png" class="cloud cloud-left" alt="왼쪽 구름" />
+  <img src="/image/right-cloud.png" class="cloud cloud-right" alt="오른쪽 구름" />
+  <img src="/image/title.png" alt="타이틀" class="title" />
+
+  <img src="/image/menu_star-button.gif" class="gif-button"
+       style="top: 49%; left: 12%; width: 26%; height: 35%;"
+       onclick="playSound('click'); setTimeout(() => goToCharacter('quizbattle'), 150)" alt="퀴즈배틀">
+
+  <img src="/image/menu_book-button.gif" class="gif-button"
+       style="top: 62%; left: 27%; width: 24%; height: 33%;"
+       onclick="playSound('click'); setTimeout(() => goToCharacter('practice'), 150)" alt="연습하기">
+
+  <img src="/image/menu_kite-button.gif" class="gif-button"
+       style="top: 64%; left: 48%; width: 26%; height: 36%;"
+       onclick="playSound('click'); setTimeout(() => goToCharacter('hero'), 150)" alt="위인찾기">
+
+  <img src="/image/menu_men-button.gif" class="gif-button"
+       style="top: 60%; left: 67%; width: 26%; height: 36%;"
+       onclick="playSound('click'); setTimeout(() => goToCharacter('today'), 150)" alt="오늘의 역사">
+
+  <img src="/image/menu_school-button.gif" class="gif-button"
+       style="top: 52%; left: 87%; width: 28%; height: 34%;"
+       onclick="playSound('click'); setTimeout(() => goToCharacter('together'), 150)" alt="같이하기">
+ <div class="grade-label">※ 본 소프트웨어는 초등학교 5학년 사회과 내용을 기반으로 개발하였습니다.</div>
+</div>
+<audio id="menuBGM" autoplay loop>
+  <source src="/sound/music/yeffi_menu.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  const bgm = document.getElementById("menuBGM");
+  bgm.volume = 0.6;
+
+  window.addEventListener("DOMContentLoaded", () => {
+    bgm.play().catch(err => {
+      console.warn("🎵 자동재생 차단됨:", err);
+    });
+  });
+
+  document.addEventListener("click", () => {
+    if (bgm && bgm.paused) {
+      bgm.play().catch(() => {});
+    }
+  });
+
+  window.addEventListener("beforeunload", () => {
+    localStorage.setItem("bgmTime", bgm.currentTime);
+  });
+</script>
+
+<script src="/sound.js"></script>
+<script src="/menu.js"></script>
+</body>
+</html>

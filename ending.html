@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>엔딩</title>
+  <style>
+    @font-face {
+      font-family: 'MaplestoryOTFBold';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff') format('woff');
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      font-family: 'MaplestoryOTFBold', sans-serif;
+      background-color: #000;
+    }
+    .container {
+      width: 90vw;
+      max-width: 700px;
+      aspect-ratio: 4 / 5;
+      position: relative;
+    }
+      .buttons {
+      display: none;
+      position: absolute;
+      top: 80%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      flex-direction: row;
+      gap: 30px;
+      z-index: 10;
+    }
+    .buttons button {
+       width: 150px; 
+        white-space: nowrap; 
+      padding: 12px 28px;
+      font-size: 1.7rem;
+      font-family: 'MaplestoryOTFBold';
+      border: none;
+      border-radius: 10px;
+      background-color: #ffffffcc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .buttons button:hover {
+      background-color: #ffe082;
+      transform: scale(0.97);
+    }
+    .buttons button:active {
+      transform: scale(0.95);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+      #endingVideo {
+      max-width: 100%;
+      border-radius: 20px;
+    }
+  </style>
+   <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:;">
+</head>
+<body>
+<div class="container">
+ <video id="endingVideo" src="/image/ending-story.mp4" autoplay muted playsinline></video>
+  <div class="buttons" id="buttonBox">
+  <button class="button-common" onclick="playEndingVideo()">다시보기</button>
+  <button class="button-common" onclick="goToMenu()">메인으로</button>
+  <button class="button-common" onclick="resetData()">데이터<br>초기화</button> 
+</div>
+
+  <audio id="endingBGM" autoplay loop>
+    <source src="/sound/music/ending.mp3" type="audio/mpeg">
+    브라우저가 오디오를 지원하지 않습니다.
+  </audio>
+  </div>
+
+<script>
+ window.onload = () => {
+  const video = document.getElementById('endingVideo');
+  const buttonBox = document.getElementById('buttonBox');
+
+  video.play().catch((err) => {
+    console.warn("🔇 자동 재생이 차단될 수 있습니다:", err);
+  });
+
+  video.onended = () => {
+    buttonBox.style.display = 'flex';
+  };
+};
+
+  function playEndingVideo() {
+    const buttonBox = document.getElementById('buttonBox');
+    const video = document.getElementById('endingVideo');
+
+    if (typeof playSound === 'function') playSound('click');
+
+    buttonBox.style.display = 'none';
+    video.play();
+      }
+
+  function goToMenu() {
+    if (typeof playSound === 'function') playSound('click');
+    const bgm = document.getElementById("endingBGM");
+    if (bgm && bgm.paused) {
+      bgm.play().catch(() => {});
+    }
+    setTimeout(() => {
+      window.location.href = 'menu.html';
+    }, 150);
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const bgm = document.getElementById("endingBGM");
+    bgm.volume = 0.6;
+    const playPromise = bgm.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        console.warn("🎵 자동 재생 차단됨. 클릭 시 재생됩니다.", err);
+      });
+    }
+  });
+
+  document.addEventListener("click", () => {
+    const bgm = document.getElementById("endingBGM");
+    if (bgm && bgm.paused) {
+      bgm.volume = 0.6;
+      bgm.play().catch(err => {
+        console.warn("🎵 사용자 클릭 후에도 BGM 재생 실패:", err);
+      });
+    }
+  });
+</script>
+<script>
+function resetData() {
+  if (confirm("모든 저장된 기록이 삭제됩니다. 계속하시겠습니까?")) {
+    localStorage.clear();
+    if (typeof playSound === 'function') playSound('click');
+    alert("데이터가 초기화되었습니다.");
+    window.location.href = "/menu.html";
+  }
+}
+</script>
+
+<script src="/sound.js"></script>
+
+</body>
+</html>

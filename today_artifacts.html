@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘의 유물</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'MaplestoryOTFBold';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff') format('woff');
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      font-family: 'MaplestoryOTFBold';
+      display: flex; justify-content: center; align-items: center;
+      background-color: #f0f0f0;
+    }
+    #screen {
+      width: 90vw; max-width: 750px; aspect-ratio: 4/5;
+      background: url("/image/today_artifact_bg.png") no-repeat center center;
+      background-size: cover;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+      display: flex; flex-direction: column;
+      padding: 2rem 1.5rem; overflow-y: auto;
+      position: relative;
+    }
+    #title {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.title-text {
+  display: inline-block;
+  font-size: 3.4rem;
+  font-weight: bold;
+  background-color: rgba(255,255,255,0.85);
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  color: #003366;
+}
+
+    #event-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .main-event {
+      background-color: rgba(255,255,255,0.95);
+      border-radius: 12px;
+      padding: 1.2rem 1.6rem;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .main-event img {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    .main-event h3 {
+      font-size: 2.4rem;
+      font-family: 'MaplestoryOTFBold';
+      color: #4b2e00;
+      margin-bottom: 0.5rem;
+    }
+    .main-event p {
+      font-size: 2.2rem;
+      line-height: 1.7;
+      text-align: center;
+    }
+    #reshuffle-btn {
+      display: none;
+      margin-top: 2rem;
+      padding: 12px 24px;
+      font-family: 'MaplestoryOTFBold';
+      font-size: 2.4rem;
+      background-color: #ffd966;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      align-self: center;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease;
+    }
+    #reshuffle-btn:hover {
+      transform: scale(1.05);
+    }
+    #loading-text {
+      font-size: 2.8rem;
+      color: #002244;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: blink 1s infinite;
+      text-align: center;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .modal-btn {
+  padding: 14px 30px;
+  font-size: 1.2rem;
+  background-color: #f5a142;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-family: 'MaplestoryOTFBold';
+  cursor: pointer;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.modal-btn:hover {
+  background-color: #e58f1e;
+  transform: scale(1.05);
+}
+
+.modal-btn:active {
+  transform: scale(0.95);
+}
+#back-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 1.6rem;
+  font-family: 'MaplestoryOTFBold';
+  z-index: 1000;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+#back-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+#back-button:active {
+  transform: scale(0.95);
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+  </style>
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:;">
+</head>
+<body>
+
+<div id="todayModalWrapper" style="
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+">
+  <div style="
+    width: 90%;
+      max-width: 500px;
+      height: 640px;
+    background-image: url('/image/today_history_modal.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    aspect-ratio: 3/4;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding-bottom: 0.5rem;
+  ">
+ 
+      <p style="
+        text-align: center;
+        color: #704000;
+        font-size: 1.4rem;
+        font-family: 'MaplestoryOTFBold';
+        margin-bottom: 23rem;
+      ">
+        오늘의 유물을 확인해봅시다!
+      </p>
+
+    <div id="achievement-summary" style="
+      margin-bottom: 2.0rem;
+      font-size: 1.4rem;
+      font-family: 'MaplestoryOTFBold'; 
+      color: #704000;
+      text-align: center;
+    ">
+      도전과제 0 / 3개 완료
+    </div>
+
+    <div style="display: flex; gap: 1rem;">
+      <button id="startBtn" class="modal-btn">게임시작</button>
+      <button id="goMenuBtn" class="modal-btn">메인메뉴</button>
+    </div>
+  </div>
+</div>
+
+  <div id="screen">
+    <button id="back-button" onclick="goBackToMenu()">메인메뉴</button>
+    <div id="title"><span class="title-text">오늘의 유물</span></div>
+    <div id="event-container">
+      <div id="loading-text">유물을 뽑는 중...</div>
+    </div>
+    <button id="reshuffle-btn">🔄 다른 유물 보기</button>
+  </div>
+
+<div id="achievement-popup" style="
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 4px solid #ffd966;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  padding: 1.5rem 2rem;
+  font-family: 'MaplestoryOTFBold';
+  font-size: 1.4rem;
+  color: #003366;
+  display: none;
+  z-index: 99999;
+  text-align: center;
+">
+  🎉 도전과제 달성!
+</div>
+<script src="/today_artifacts_data.js"></script>
+  <script src="/today_artifacts.js"></script>
+</body>
+</html>

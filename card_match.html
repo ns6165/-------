@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+      content="default-src * 'self' data: blob: filesystem:;
+               script-src * 'unsafe-inline' 'unsafe-eval';
+               style-src * 'unsafe-inline';
+               img-src * data: blob:;">
+  <title>별별이 연결퀴즈</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script> 
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+    font-family: 'MaplestoryOTFBold';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    }
+    @font-face {
+    font-family: 'Bazzi';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/Bazzi.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    }
+    @font-face {
+    font-family: 'Cafe24Ohsquare';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/Cafe24Ohsquare.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      font-family: 'MaplestoryOTFBold', sans-serif;
+      overflow: hidden;
+    }
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #connect-screen {
+      width: 90vw;
+      max-width: 750px;
+      max-height: 100vh;
+      justify-content: space-between;
+      aspect-ratio: 4/5;
+      background: url("./image/connect_game1.png") no-repeat center center;
+      background-size: cover;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding-top: 1rem;
+    }
+    #overlay {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4rem;
+  font-family: 'MaplestoryOTFBold', cursive;
+  text-align: center;
+  z-index: 10;
+  color: 	#ff9aa2;
+  text-shadow: 3px 3px 4px #000;
+  display: none;
+  white-space: nowrap;
+}
+
+    #quiz-info {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  background: rgba(255,255,255,0.8);
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-family: 'MaplestoryOTFBold';
+  font-size: 1rem;
+  line-height: 1.5;
+  box-shadow: 1px 1px 6px rgba(0,0,0,0.2);
+  z-index: 30;
+}
+
+    #modal-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    #modal-box {
+      width: 90%;
+      max-width: 500px;
+      height: 640px;
+      background-image: url('./image/together_modal.png');
+      background-size: cover;
+      background-position: center;
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    #countdown {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 8rem;
+      color: white;
+      text-shadow: 3px 3px 12px black;
+      z-index: 200;
+      font-family: 'MaplestoryOTFBold';
+      display: none;
+    }
+
+    #game-area {
+      position: relative;
+      width: 90%;
+      height: 95%;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 0.4rem;
+      padding: 15vh 1rem 1rem 1rem;
+      min-height: 400px;
+    }
+
+    .tile {
+      background-color: #fff;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'MaplestoryOTFBold';
+      font-size: 1.2rem;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+      padding: 0.5rem;
+      color: #000;
+      transition: transform 0.1s ease;
+    }
+
+    .tile:active {
+      transform: scale(0.95);
+      box-shadow: inset 2px 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .tile.selected {
+      border: 3px solid #ff9800;
+      background-color: #fff3cd;
+    }
+
+    .tile.matched {
+      background-color: transparent;
+      border: 2px solid transparent;
+      cursor: default;
+      color: transparent;
+    }
+
+    #result-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+#result-box {
+  width: 90vw;
+  max-width: 500px;
+  height: 700px;
+  background-image: url('./image/result_modal.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#result-text {
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  font-size: 2.0rem;
+  color: #333;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 12rem;
+}
+.button-row {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 7.5rem;
+}
+
+#retry-btn, #menu-btn {
+  padding: 10px 40px;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  font-size: 1.8rem;
+  background-color: #ffd966;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+#retry-btn:hover, #menu-btn:hover {
+  background-color: #ffe0668f;
+  transform: scale(1.05);
+}
+#retry-btn:active, #menu-btn:active {
+  transform: scale(0.95);
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.25);
+}
+#combo-text {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  transform-origin: center center;
+  font-size: 4.5rem;
+  font-family: 'MaplestoryOTFBold', cursive;
+  z-index: 999;
+  display: none;
+  color: #ffaec9;
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0px  0px 8px rgba(0, 0, 0, 0.6);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+@keyframes correctPop {
+  0%   { transform: translateX(-50%) scale(1); }
+  50%  { transform: translateX(-50%) scale(1.2); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+@keyframes overlayPop {
+  0%   { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  50%  { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+.overlay-pop {
+  animation: overlayPop 1s ease-in-out;
+}
+.correct-pop {
+  animation: correctPop 0.5s ease-in-out;
+}
+.overlay-pop {
+  animation: overlayPop 1s ease-in-out;
+}
+@keyframes countdown-bounce {
+  0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
+  30%  { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+}
+
+  </style>
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:;">
+</head>
+<body>
+  
+  <div id="connect-screen">
+    <div id="time-bar-container">
+  <div id="time-bar"></div>
+</div>
+    <div id="combo-text">콤보!</div>
+    <div id="overlay"></div>
+
+    <div id="quiz-info">
+  <div id="timer">⏱ 남은 시간: 60초</div>
+  <div id="score">⭐ 점수: 0점</div>
+  <div id="combo">🔢 문제 수: 0</div>
+  <div id="combo-max">🏆 최고 콤보: 0</div>
+</div>
+
+    <div id="modal-container">
+      <div id="modal-box">
+  <p style="
+    text-align: center;
+    color: #00336600;
+    font-size: 1.05rem;
+    font-weight: bold;
+    font-family: 'MaplestoryOTFBold', sans-serif;
+    margin-top: 8rem;
+    margin-bottom: 1.5rem;
+  ">
+    제한시간 내에 문제를 풀어봅시다.
+  </p>
+
+  <div style="
+    text-align: center;
+    color: #00336600;
+    font-size: 1rem;
+    line-height: 1.6;
+    font-family: 'MaplestoryOTFBold', sans-serif;
+    margin-top: 16rem;
+    margin-bottom: 2rem;
+  ">
+    ✔ 타임어택 3회 클리어 (<span id="clearCount">0</span>/3)<br>
+    🏆 최고 점수 150점 돌파 (<span id="scoreRecord">0</span>점)
+  </div>
+</div>
+
+    </div>
+
+    <div id="countdown">3</div>
+    <div id="game-area"></div>
+  </div>
+
+  <div id="result-modal" style="display: none;">
+  <div id="result-box">
+    <div id="result-text">결과 텍스트 들어갈 자리</div>
+
+    <div class="button-row">
+      <button id="retry-btn">다시하기</button>
+      <button id="menu-btn">메인메뉴</button>
+    </div>
+  </div>
+</div>
+
+
+  <script src="./card_match.js"></script>
+</body>
+</html>

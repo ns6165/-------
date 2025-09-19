@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+      content="default-src * 'self' data: blob: filesystem:;
+               script-src * 'unsafe-inline' 'unsafe-eval';
+               style-src * 'unsafe-inline';
+               img-src * data: blob:;">
+  <title>캐치마인드 입장</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'MaplestoryOTFBold';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'MaplestoryOTFBold', 'Gowun Dodum', sans-serif;
+      background-color: #f0f0f0;
+    }
+
+    #entry-screen {
+      width: 90vw;
+      max-width: 750px;
+      aspect-ratio: 4 / 5;
+      background: url("./image/desert_background.png") no-repeat center center;
+      background-size: cover;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .entry-box {
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 80%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.4rem;
+      border-radius: 12px;
+      border: 2px solid #ccc;
+      font-family: 'MaplestoryOTFBold';
+    }
+
+    button {
+      padding: 0.8rem 2rem;
+      font-size: 1.6rem;
+      background-color: #ffd966;
+      border: none;
+      border-radius: 12px;
+      font-family: 'MaplestoryOTFBold';
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #ffea80;
+      transform: scale(1.05);
+    }
+
+    .team-btn.selected {
+      background-color: #ffb347;
+      color: white;
+    }
+  .role-btn {
+  font-size: 1.6rem; 
+  padding: 0.8rem 2rem;
+  min-width: 110px;
+}
+.role-btn.selected {
+  background-color: #ffb347; 
+  color: white;
+}
+.title-box {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  padding: 1rem 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+}
+
+.title-box h1 {
+  font-size: 3rem;
+  color: #333366;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  margin: 0;
+}
+#entry-screen {
+  position: relative; 
+}
+#mainmenu-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 2.0rem;
+  z-index: 10;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'MaplestoryOTFBold';
+}
+
+#mainmenu-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  transform: scale(1.05); 
+}
+
+#mainmenu-button:active {
+  transform: scale(0.95); 
+  background-color: rgba(0, 0, 0, 0.7);
+}
+  </style>
+   <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:;">
+</head>
+<body>
+<div id="entry-screen">
+  <button id="mainmenu-button" onclick="goToMainMenu()">메인메뉴</button>
+  <div class="title-box">
+    <h1>그림 퀴즈 입장 화면</h1>
+  </div>
+  <div id="server-status" style="margin-top: 1rem; font-size: 1.8rem; color: gray;">
+  서버 상태 확인 중...
+</div>
+
+    <div class="entry-box">
+      <input type="text" id="nickname" placeholder="닉네임을 입력하지 않았습니다!">
+      <input type="text" id="code" placeholder="게임 코드를 입력하지 않았습니다!">
+
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
+  <button class="team-btn" onclick="selectTeam('1', this)">1조</button>
+  <button class="team-btn" onclick="selectTeam('2', this)">2조</button>
+  <button class="team-btn" onclick="selectTeam('3', this)">3조</button>
+  <button class="team-btn" onclick="selectTeam('4', this)">4조</button>
+  <button class="team-btn" onclick="selectTeam('5', this)">5조</button>
+  <button class="team-btn" onclick="selectTeam('6', this)">6조</button>
+</div>
+<div style="margin-top: 1rem; text-align: center;">
+   <button class="team-btn role-btn" onclick="selectRole('player')"> 참가자</button>
+  <button class="team-btn role-btn" onclick="selectRole('host')"> 출제자</button>
+</div>
+
+
+      <button id="ready-btn">✅ 준비 완료</button>
+    </div>
+  </div>
+
+ <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script src="./catch_entry.js"></script>
+<script>
+const statusEl = document.getElementById("server-status");
+
+fetch("https://card-match-game-server.onrender.com")
+  .then(() => {
+    statusEl.textContent = "🟢 서버가 준비되었습니다!";
+    statusEl.style.color = "green";
+  })
+  .catch(() => {
+    statusEl.textContent = "🔴 서버가 응답하지 않습니다.";
+    statusEl.style.color = "red";
+  });
+</script>
+
+</html>

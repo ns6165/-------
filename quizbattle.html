@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한국사 미니게임 천국 - 퀴즈배틀</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+    font-family: 'MaplestoryOTFBold';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    }
+    @font-face {
+    font-family: 'Bazzi';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/Bazzi.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    }
+    @font-face {
+    font-family: 'Cafe24Ohsquare';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/Cafe24Ohsquare.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+    :root {
+      --score-top: 13vh;
+      --score-left: 8vw;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+     font-family: 'MaplestoryOTFBold';
+      flex-direction: column;
+    }
+    #quiz-screen {
+      width: 90vw;
+      max-width: 750px;
+      aspect-ratio: 4/5;
+      background: url("/image/quiz1.png") no-repeat center center;
+      background-size: cover;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding-top: 1rem;
+    }
+    .score {
+      position: absolute;
+      top: var(--score-top);
+      left: var(--score-left);
+      z-index: 20;
+      font-size: 2.4rem;
+      font-weight: bold;
+      color: #333;
+      font-family: 'MaplestoryOTFBold', cursive;
+    }
+    .quiz-container {
+      position: relative;
+      width: 90%;
+      height: 100%;
+    }
+    .question-area {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 69%;
+  padding: 1.5rem 2rem;
+  height: 29%;
+
+ font-family: 'MaplestoryOTFBold';
+  font-size: 2rem;
+  line-height: 1.5;
+  text-align: center;
+
+  background-color: 		#75bdf0; 
+  border-radius: 16px;
+ }
+
+    .choice-area { position: relative; width: 100%; height: 100%; }
+ .choice-button {
+  position: absolute;
+  font-size: 1.6rem;
+  border-radius: 2em;
+  border: none;
+  background-color: #fff4b0;       
+  color: #5a4e00;                   
+  font-weight: bold;
+  font-family: 'MaplestoryOTFBold';
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  width: 28vw;
+  max-width: 250px;
+  min-width: 120px;
+  min-height: 55px;
+  height: auto;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.choice-button:hover {
+  background-color: #ffec8b;        
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.choice-button:active {
+  background-color: #ffe066;       
+  transform: translate(-50%, -50%) scale(0.95);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.25);
+  transition: transform 0.1s ease;
+}
+
+    .feedback { display: none; }
+    .overlay {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 4rem;
+      font-family: 'MaplestoryOTFBold', cursive;
+      text-align: center;
+      z-index: 10;
+      color: #ffffff;
+      text-shadow: 3px 3px 4px #000;
+      white-space: nowrap;
+    }
+    #countdown {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 8rem;
+      color: white;
+      text-shadow: 3px 3px 12px black;
+      z-index: 200;
+      font-family: 'MaplestoryOTFBold', cursive;
+    }
+    @keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+.pop-score {
+  animation: pop 0.4s ease-in-out;
+}
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+#result-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+#result-box {
+  width: 90vw;
+  max-width: 500px;
+  height: 700px;
+  background-image: url('/image/result_modal.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#result-text {
+  font-family: 'MaplestoryOTFBold';
+  font-size: 2.0rem;
+  color: #333;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 12rem;
+}
+.button-row {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 7.5rem;
+}
+
+#retry-btn,
+#menu-btn {
+  padding: 10px 40px;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  font-size: 1.8rem;
+  background-color: #ffd966;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+#retry-btn:hover,
+#menu-btn:hover {
+  background-color: #ffe0668f;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+#retry-btn:active,
+#menu-btn:active {
+  transform: scale(0.95);
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.25);
+}
+
+
+#result-text {
+  white-space: pre-line; 
+}
+@keyframes correctPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.correct-pop {
+  animation: correctPop 0.5s ease-in-out;
+}
+#combo-text {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 4.5rem;
+  font-family: 'MaplestoryOTFBold', cursive;
+  z-index: 999;
+  display: none;
+
+  color:#ffffff;
+
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0px  0px 8px rgba(0, 0, 0, 0.6);
+
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
+}
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes correctPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.correct-pop {
+  animation: correctPop 0.5s ease-in-out;
+}
+
+.pop-score {
+  animation: correctPop 0.4s ease-in-out;
+}
+@keyframes countdown-bounce {
+  0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
+  30%  { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+}
+.game-btn {
+  padding: 12px 36px;
+  background-color: #ffd966;
+  border-radius: 12px;
+  border: none;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: 'MaplestoryOTFBold';
+  cursor: pointer;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.game-btn:hover {
+  background-color: #ffe066;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+.game-btn:active {
+  transform: scale(0.95);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.25);
+}
+.unit-btn {
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.1s ease;
+   border-radius: 20px;
+}
+.unit-btn:hover {
+  background-color: #ffe066;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+.unit-btn:active {
+  transform: scale(0.95);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.25);
+}
+
+
+  </style>
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:;">
+</head>
+<body>
+  <div id="modal-container" style="
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  ">
+<div style="
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 90vw;
+  max-width: 500px;
+  height: 640px;
+  background-image: url('/image/quiz-modal.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  box-shadow: none;
+">
+      <p style="
+        text-align: center;
+        color: #003366;
+        font-size: 1.05rem;
+        font-weight: bold;
+         font-family: 'MaplestoryOTFBold';
+        margin-top: 8rem;
+        margin-bottom: 1.5rem;
+      ">
+        제한시간 내에 문제를 풀어봅시다!
+      </p>
+    <p id="character-progress" style="
+  margin-top: 18rem;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #003366;
+  font-family: 'MaplestoryOTFBold';
+  text-align: center;
+">
+</p>
+
+<div class="button-row">
+  <button id="start-btn" class="game-btn">게임시작</button>
+  <button id="start-menu-btn" class="game-btn">메인메뉴</button>
+</div>
+
+    </div>
+  </div>
+<div id="unit-modal" style="
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+">
+  <div style="
+    width: 90vw;
+    max-width: 500px;
+    aspect-ratio: 3/4;
+    background: url('/image/syudy_modal.png') no-repeat center center;
+    background-size: contain;
+    position: relative;
+  ">
+
+   <div class="unit-btn-wrapper" style="position:absolute; top: 29%; left: 50%; transform:translateX(-50%); width: 60%; height: 7%;">
+   <button class="unit-btn" data-unit="1-1" data-file="quiz-data-1-1.js" style="width:100%; height:100%; background:transparent; border:none;"></button>
+</div>
+
+<div class="unit-btn-wrapper" style="position:absolute; top: 39%; left: 50%; transform:translateX(-50%); width: 60%; height: 10%;">
+  <button class="unit-btn" data-unit="1-2" data-file="quiz-data-1-2.js" style="width:100%; height:100%; background:transparent; border:none;"></button>
+</div>
+
+<div class="unit-btn-wrapper" style="position:absolute; top: 51%; left: 50%; transform:translateX(-50%); width: 60%; height: 10%;">
+  <button class="unit-btn" data-unit="1-3" data-file="quiz-data-1-3.js" style="width:100%; height:100%; background:transparent; border:none;"></button>
+</div>
+
+<div class="unit-btn-wrapper" style="position:absolute; top: 64%; left: 50%; transform:translateX(-50%); width: 60%; height: 10%;">
+  <button class="unit-btn" data-unit="2-1" data-file="quiz-data-2-1.js" style="width:100%; height:100%; background:transparent; border:none;"></button>
+</div>
+
+<div class="unit-btn-wrapper" style="position:absolute; top: 75%; left: 50%; transform:translateX(-50%); width: 60%; height: 10%;">
+  <button class="unit-btn" data-unit="2-2" data-file="quiz-data-2-2.js" style="width:100%; height:100%; background:transparent; border:none;"></button>
+</div>
+
+<div class="unit-btn-wrapper" style="position:absolute; top: 87%; left: 50%; transform:translateX(-50%); width: 60%; height: 10%;">
+  <button class="unit-btn" data-unit="2-3" data-file="quiz-data-2-3.js" style="width:100%; height:100%; background:transparent; border:none;"></button>
+</div>
+
+  </div>
+</div>
+
+  <div id="quiz-screen" style="display: flex; position: relative;">
+    <div id="combo-text" style="
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 4.5rem;
+  font-family: 'MaplestoryOTFBold', cursive;
+  display: none;
+  z-index: 999;
+"></div>
+  
+<div id="quiz-info" style="
+  position: absolute;
+  top: 2.5%;
+  left: 4%;
+  font-size: 1.1rem;
+  font-family: 'MaplestoryOTFBold', sans-serif;
+  color: #003366;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  line-height: 1.6;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+  z-index: 20;
+">
+  <div id="time-display">⏱ 남은 시간: 100초</div>
+  <div id="text-score-display">⭐ 점수: 0점</div>
+  <div id="solved-count">🔢 문제 수: 0</div>
+  <div id="combo-max">🏆 최고 콤보: 0</div>
+</div>
+
+    <div class="score" id="score-display" style="display: none;">0</div>
+    <div class="quiz-container">
+      <div class="question-area" id="question">문제가 여기에 표시됩니다</div>
+      <div class="choice-area" id="choices">
+        <button id="choice1" class="choice-button" style="top: 82.5%; left: 25%;">보기1</button>
+        <button id="choice2" class="choice-button" style="top: 82.5%; left: 75%;">보기2</button>
+        <button id="choice3" class="choice-button" style="top: 93%; left: 25%;">보기3</button>
+        <button id="choice4" class="choice-button" style="top: 93%; left: 75%;">보기4</button>
+      </div>
+      <div class="overlay" id="overlay"></div>
+      <div id="countdown" style="
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 6rem;
+  font-family: 'MaplestoryOTFBold';
+  color: white;
+  text-shadow: 3px 3px 12px black;
+  z-index: 2000;
+  display: none;
+  pointer-events: none;
+"></div>
+
+ </div>
+<div id="result-modal" style="display: none;">
+  <div id="result-box">
+    <div id="result-text">결과 텍스트 들어갈 자리</div>
+
+    <div class="button-row">
+      <button id="retry-btn">다시하기</button>
+      <button id="menu-btn">메인메뉴</button>
+    </div>
+  </div>
+</div>
+<div id="achievement-popup" style="
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 4px solid #ffd966;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  padding: 1.5rem 2rem;
+  font-family: 'MaplestoryOTFBold';
+  font-size: 1.4rem;
+  color: #003366;
+  display: none;
+  z-index: 99999;
+  text-align: center;
+">
+  🎉 도전과제 달성!
+</div>
+
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const retryBtn = document.getElementById("retry-btn");
+  const menuBtn = document.getElementById("menu-btn");
+  const startBtn = document.getElementById("start-btn");
+  const startMenuBtn = document.getElementById("start-menu-btn");
+
+  if (retryBtn) {
+    retryBtn.onclick = () => {
+      playSound("click");
+      setTimeout(() => {
+        location.reload();
+      }, 300);
+    };
+  }
+
+  if (menuBtn) {
+    menuBtn.onclick = () => {
+      playSound("click");
+      setTimeout(() => {
+        location.href = "/menu.html";
+      }, 300);
+    };
+  }
+
+  if (startBtn) {
+    startBtn.onclick = () => {
+      playSound("click");
+      document.getElementById("modal-container").style.display = "none";
+    };
+  }
+
+  if (startMenuBtn) {
+    startMenuBtn.onclick = () => {
+      playSound("click");
+      setTimeout(() => {
+        location.href = "/menu.html";
+      }, 300);
+    };
+  }
+ });
+</script>
+<script src="/quizbattle.js"></script>     
+</body>
